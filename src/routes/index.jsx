@@ -24,7 +24,7 @@ const RootRedirect = () => {
   }
 
   // Redirigir según el estado de autenticación
-  return <Navigate to={isAuthenticated ?  "/login" : "/dashboard"} replace />;
+  return <Navigate to={isAuthenticated ? "/dashboard" : "/login"} replace />;
 };
 
 // Componente para proteger la ruta de login (evitar acceso si ya está autenticado)

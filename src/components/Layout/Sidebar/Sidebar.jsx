@@ -48,7 +48,7 @@ const Sidebar = ({ isOpen, isCompact }) => {
           }}
         >
           <LayoutDashboard size={18} style={{ color: activeItem === '/dashboard' ? 'var(--color-primary)' : 'var(--color-text-muted)' }} />
-          {!isCompact && <span className="text-sm font-medium">Overview</span>}
+          {!isCompact && <span className="text-sm font-medium">Dashboard</span>}
         </button>
   
         {/* Categoría */}

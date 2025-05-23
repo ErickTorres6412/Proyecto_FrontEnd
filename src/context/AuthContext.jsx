@@ -79,6 +79,8 @@ export const AuthProvider = ({ children }) => {
             
             if (result.success) {
                 const userData = result.data;
+
+                console.log('Datos de usuario:', userData);
                 
                 // Extraer el token del objeto anidado
                 const token = userData.token?.token || userData.token;
