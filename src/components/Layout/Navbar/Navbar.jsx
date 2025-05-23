@@ -31,7 +31,7 @@ const Navbar = ({
                 <path d="M2 17L12 22L22 17" stroke="var(--color-primary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                 <path d="M2 12L12 17L22 12" stroke="var(--color-primary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
-              <span className="text-lg font-semibold ml-2" style={{ color: 'var(--color-primary)' }}>SECOVI</span>
+              <span className="text-lg font-semibold ml-2" style={{ color: 'var(--color-primary)' }}>Examen 2</span>
             </div>
            
             {/* Botón para encoger/expandir sidebar */}

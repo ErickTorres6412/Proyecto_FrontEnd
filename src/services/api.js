@@ -1,7 +1,7 @@
+// src/services/api.js
 import axios from 'axios';
-import { API_ENDPOINTS } from '../config/constant.js';
 
-const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5180";;
+const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5180";
 
 // Instancia para JSON
 const api = axios.create({
@@ -21,47 +21,53 @@ const api_form_data = axios.create({
   }
 });
 
-// -------- Condominios --------
-export const obtenerCondominios = () => api.get(API_ENDPOINTS.CONDOMINIO);
-export const obtenerCondominio = (id) => api.get(`${API_ENDPOINTS.CONDOMINIO}/${id}`);
-export const crearCondominio = (data) => api.post(API_ENDPOINTS.CONDOMINIO, data);
-export const actualizarCondominio = (data) => api.put(API_ENDPOINTS.CONDOMINIO, data);
+// Interceptor para añadir el token a todas las peticiones
+const addTokenInterceptor = (apiInstance) => {
+  apiInstance.interceptors.request.use(
+    (config) => {
+      const token = localStorage.getItem('token');
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+      return config;
+    },
+    (error) => {
+      return Promise.reject(error);
+    }
+  );
+};
 
-// -------- AreaComun --------
-export const crearAreaComun = (data) => api.post(API_ENDPOINTS.AREACOMUN, data);
-export const obtenerAreasComunes = () => api.get(API_ENDPOINTS.AREACOMUN);
-export const obtenerAreaComun = (id) => api.get(`${API_ENDPOINTS.AREACOMUN}/${id}`);
-export const actualizarAreaComun = (data) => api.put(API_ENDPOINTS.AREACOMUN, data);
+// Interceptor para manejar respuestas y errores de autenticación
+const addResponseInterceptor = (apiInstance) => {
+  apiInstance.interceptors.response.use(
+    (response) => {
+      return response;
+    },
+    (error) => {
+      // Si el token ha expirado o es inválido
+      if (error.response?.status === 401) {
+        // Limpiar localStorage
+        localStorage.removeItem('token');
+        localStorage.removeItem('userInfo');
+        
+        // Redirigir al login solo si no estamos ya en login
+        const currentPath = window.location.pathname;
+        if (currentPath !== '/login') {
+          window.location.href = '/login';
+        }
+      }
+      
+      return Promise.reject(error);
+    }
+  );
+};
 
-// -------- Vehiculos --------
-export const crearVehiculo = (data) => api.post(API_ENDPOINTS.VEHICULO, data);
-export const obtenerVehiculos = () => api.get(API_ENDPOINTS.VEHICULO);
-export const obtenerVehiculo = (id) => api.get(`${API_ENDPOINTS.VEHICULO}/${id}`);
-export const actualizarVehiculo = (data) => api.put(API_ENDPOINTS.VEHICULO, data);
+// Aplicar interceptors a ambas instancias
+addTokenInterceptor(api);
+addTokenInterceptor(api_form_data);
+addResponseInterceptor(api);
+addResponseInterceptor(api_form_data);
 
-
-// -------- Foro --------
-export const crearTemaForo = (data) => api.post(API_ENDPOINTS.FORO, data);
-export const obtenerTemasForo = () => api.get(API_ENDPOINTS.FORO);
-export const obtenerDetalleTema = (id) => api.get(`${API_ENDPOINTS.FORO}/${id}`);
-export const agregarRespuesta = (data) => api.post(`${API_ENDPOINTS.FORO}/respuesta`, data);
-
-
-
-//--------- Sector -------
-export const crearSector = (data) => api.post(API_ENDPOINTS.SECTOR, data);
-export const obtenerSectores= () => api.get(API_ENDPOINTS.SECTOR);
-export const obtenerSector = (id) => api.get(`${API_ENDPOINTS.SECTOR}/${id}`);
-export const actualizarSector= (data) => api.put(API_ENDPOINTS.SECTOR, data);
-
-
-
-//--------- Propiedad --------
-export const crearPropiedad = (data) => api.post(API_ENDPOINTS.PROPIEDAD, data);
-export const obtenerPropiedades = () => api.get(API_ENDPOINTS.PROPIEDAD);
-export const obtenerPropiedad = (id) => api.get(`${API_ENDPOINTS.PROPIEDAD}/${id}`);
-export const actualizarPropiedad= (data) => api.put(API_ENDPOINTS.PROPIEDAD, data);
-
-// Exportar las instancias si las necesitas en otros módulos
+// Exportar las instancias
 export { api, api_form_data };
 export default api;
