@@ -1,6 +1,5 @@
 // src/hooks/useBackgroundElements.js
 import { useRef, useEffect } from 'react';
-import React from 'react';
 
 export const useBackgroundElements = (timeOfDay, HOLIDAY_THEME) => {
   const starsRef = useRef(null);

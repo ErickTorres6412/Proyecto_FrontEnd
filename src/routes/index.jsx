@@ -14,15 +14,42 @@ const RootRedirect = () => {
   // Mostrar loading mientras se inicializa
   if (!isInitialized || loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-        <span className="ml-3 text-gray-600">Cargando...</span>
+      <div className="flex items-center justify-center min-h-screen bg-gray-50">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <span className="mt-3 block text-gray-600">Cargando...</span>
+        </div>
       </div>
     );
   }
 
   // Redirigir según el estado de autenticación
-  return <Navigate to={isAuthenticated ? "/dashboard" : "/login"} replace />;
+  return <Navigate to={isAuthenticated ?  "/login" : "/dashboard"} replace />;
+};
+
+// Componente para proteger la ruta de login (evitar acceso si ya está autenticado)
+const LoginRoute = () => {
+  const { isAuthenticated, loading, isInitialized } = useAuth();
+
+  // Mostrar loading mientras se inicializa
+  if (!isInitialized || loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-50">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <span className="mt-3 block text-gray-600">Verificando sesión...</span>
+        </div>
+      </div>
+    );
+  }
+
+  // Si ya está autenticado, redirigir al dashboard
+  if (isAuthenticated) {
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  // Si no está autenticado, mostrar login
+  return <Login />;
 };
 
 const router = createBrowserRouter(
@@ -31,8 +58,8 @@ const router = createBrowserRouter(
       {/* Ruta raíz con redirección inteligente */}
       <Route path="/" element={<RootRedirect />} />
       
-      {/* Login separado, fuera del Layout */}
-      <Route path="/login" element={<Login />} />
+      {/* Login con protección contra acceso autenticado */}
+      <Route path="/login" element={<LoginRoute />} />
 
       {/* Rutas protegidas */}
       <Route
@@ -44,7 +71,7 @@ const router = createBrowserRouter(
         }
       />
 
-      {/* Más rutas protegidas */}
+      {/* Más rutas protegidas - descomenta cuando las necesites */}
       {/* 
       <Route
         path="/usuarios"

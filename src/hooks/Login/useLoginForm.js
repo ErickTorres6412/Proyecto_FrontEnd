@@ -32,14 +32,14 @@ export const useLoginForm = () => {
         return;
       }
 
-      if (password.length < 6) {
+      if (password.length < 2) {
         setError('La contraseña debe tener al menos 6 caracteres');
         return;
       }
 
       // Preparar credenciales
       const credentials = {
-        username: username.trim(),
+        userName: username.trim(),
         password: password
       };
 

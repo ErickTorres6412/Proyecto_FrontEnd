@@ -9,6 +9,30 @@ export const AuthProvider = ({ children }) => {
     const [loading, setLoading] = useState(true);
     const [isInitialized, setIsInitialized] = useState(false);
 
+    // Función para verificar si el token ha expirado
+    const isTokenExpired = (token) => {
+        try {
+            if (!token) return true;
+            
+            // Decodificar el payload del JWT (parte del medio)
+            const payload = JSON.parse(atob(token.split('.')[1]));
+            const currentTime = Date.now() / 1000; // Convertir a segundos
+            
+            // Verificar si el token ha expirado
+            return payload.exp < currentTime;
+        } catch (error) {
+            console.error('Error al verificar token:', error);
+            return true; // Si hay error, considerar como expirado
+        }
+    };
+
+    // Función para limpiar completamente la sesión
+    const clearSession = () => {
+        setUser(null);
+        localStorage.removeItem('token');
+        localStorage.removeItem('userInfo');
+    };
+
     // Función para inicializar el estado de autenticación
     const initializeAuth = async () => {
         try {
@@ -16,28 +40,25 @@ export const AuthProvider = ({ children }) => {
             const userInfo = localStorage.getItem('userInfo');
             
             if (token && userInfo) {
-                // Verificar si el token sigue siendo válido
-                const verificationResult = await authService.verifyToken();
-                
-                if (verificationResult.success) {
+                // Verificar si el token no ha expirado
+                if (!isTokenExpired(token)) {
                     const parsedUserInfo = JSON.parse(userInfo);
                     setUser({
                         token,
                         ...parsedUserInfo
                     });
                 } else {
-                    // Token inválido, limpiar localStorage
-                    localStorage.removeItem('token');
-                    localStorage.removeItem('userInfo');
-                    setUser(null);
+                    // Token expirado, limpiar localStorage
+                    clearSession();
                 }
+            } else {
+                // No hay datos de sesión
+                clearSession();
             }
         } catch (error) {
             console.error('Error al inicializar autenticación:', error);
             // En caso de error, limpiar datos
-            localStorage.removeItem('token');
-            localStorage.removeItem('userInfo');
-            setUser(null);
+            clearSession();
         } finally {
             setLoading(false);
             setIsInitialized(true);
@@ -59,26 +80,43 @@ export const AuthProvider = ({ children }) => {
             if (result.success) {
                 const userData = result.data;
                 
-                // Estructura esperada del response del API
+                // Extraer el token del objeto anidado
+                const token = userData.token?.token || userData.token;
+                
+                if (!token) {
+                    return { 
+                        success: false, 
+                        error: 'Token no recibido del servidor' 
+                    };
+                }
+                
+                // Verificar que el token no esté expirado antes de guardarlo
+                if (isTokenExpired(token)) {
+                    return {
+                        success: false,
+                        error: 'El token recibido ya está expirado'
+                    };
+                }
+                
+                // Estructura del usuario basada en la respuesta del backend
                 const userToStore = {
-                    token: userData.token,
-                    nombreCompleto: userData.nombreCompleto || userData.name,
-                    username: userData.username,
-                    email: userData.email,
-                    idRol: userData.idRol || userData.roleId
+                    token: token,
+                    username: userData.userName,
+                    roles: userData.roles || [],
+                    // Agregar información adicional si está disponible
+                    expiration: userData.token?.expiration
                 };
                 
-                // Actualizar estado
-                setUser(userToStore);
-                
-                // Guardar en localStorage
-                localStorage.setItem('token', userData.token);
+                // Guardar en localStorage primero
+                localStorage.setItem('token', token);
                 localStorage.setItem('userInfo', JSON.stringify({
-                    nombreCompleto: userToStore.nombreCompleto,
                     username: userToStore.username,
-                    email: userToStore.email,
-                    idRol: userToStore.idRol
+                    roles: userToStore.roles,
+                    expiration: userToStore.expiration
                 }));
+                
+                // Actualizar estado después
+                setUser(userToStore);
                 
                 return { success: true };
             } else {
@@ -95,27 +133,39 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
-    const logout = async () => {
-        try {
-            // Llamar al endpoint de logout si existe
-            await authService.logout();
-        } catch (error) {
-            console.error('Error en logout:', error);
-        } finally {
-            // Limpiar estado y localStorage independientemente del resultado
-            setUser(null);
-            localStorage.removeItem('token');
-            localStorage.removeItem('userInfo');
+    const logout = () => {
+        // Limpiar inmediatamente
+        clearSession();
+        
+        // Forzar navegación al login
+        window.location.href = '/login';
+    };
+
+    // Función para verificar autenticación periódicamente
+    const checkAuthStatus = () => {
+        const token = localStorage.getItem('token');
+        if (token && isTokenExpired(token)) {
+            console.log('Token expirado detectado, cerrando sesión...');
+            logout();
         }
     };
+
+    // Verificar estado de autenticación cada 5 minutos
+    useEffect(() => {
+        if (user) {
+            const interval = setInterval(checkAuthStatus, 5 * 60 * 1000); // 5 minutos
+            return () => clearInterval(interval);
+        }
+    }, [user]);
 
     const value = {
         user,
         login,
         logout,
         loading,
-        isAuthenticated: !!user,
-        isInitialized
+        isAuthenticated: !!user && !!user.token,
+        isInitialized,
+        checkAuthStatus // Exponer para uso manual si es necesario
     };
 
     return (
