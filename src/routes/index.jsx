@@ -6,6 +6,7 @@ import ProtectedRoute from './ProtectedRoute';
 // Importa los componentes de páginas
 import Dashboard from '../pages/Dashboard/Dashboard';
 import Login from '../pages/Login/Login';
+import Departamentos from '../pages/Departamentos/Departamentos';
 
 // Componente para manejar la redirección de la raíz
 const RootRedirect = () => {
@@ -57,21 +58,30 @@ const router = createBrowserRouter(
     <>
       {/* Ruta raíz con redirección inteligente */}
       <Route path="/" element={<RootRedirect />} />
-      
+
       {/* Login con protección contra acceso autenticado */}
       <Route path="/login" element={<LoginRoute />} />
 
-      {/* Rutas protegidas */}
-      <Route
-        path="/dashboard"
+      {/* Rutas protegidas - CORREGIDO */}
+      <Route 
+        path="/dashboard" 
         element={
           <ProtectedRoute>
             <Dashboard />
           </ProtectedRoute>
-        }
+        } 
+      />
+      
+      <Route 
+        path="/departamentos" 
+        element={
+          <ProtectedRoute>
+            <Departamentos />
+          </ProtectedRoute>
+        } 
       />
 
-      {/* Más rutas protegidas - descomenta cuando las necesites */}
+      {/* Más rutas protegidas */}
       {/* 
       <Route
         path="/usuarios"

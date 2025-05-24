@@ -1,9 +1,9 @@
+// src/components/Layout/Layout.jsx
 import React, { useState } from 'react';
-import { Outlet } from 'react-router-dom';
 import Navbar from './Navbar/Navbar';
 import Sidebar from './Sidebar/Sidebar';
 
-const Layout = () => {
+const Layout = ({ children }) => { // <- CAMBIO: Recibir children como prop
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isSidebarCompact, setIsSidebarCompact] = useState(false);
   
@@ -31,7 +31,7 @@ const Layout = () => {
       {/* Contenido principal */}
       <main className={`transition-all duration-300 ease-in-out ${isSidebarOpen ? (isSidebarCompact ? 'lg:ml-20' : 'lg:ml-64') : ''}`}>
         <div className="p-6 pt-20">
-          <Outlet />
+          {children} {/* CAMBIO: Usar children en lugar de Outlet */}
         </div>
       </main>
     </div>

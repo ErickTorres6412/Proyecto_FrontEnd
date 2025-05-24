@@ -2,10 +2,10 @@ import { Package } from 'lucide-react';
 
 const modules = [
   {
-    title: 'Examen 2',
+    title: 'Departamentos',
     icon: Package,
     subItems: [
-      { label: 'Info Examen', link: '/visualizar-condominios' }
+      { label: 'Departamentos', link: '/departamentos' }
     ]
   }
 ];

@@ -122,7 +122,7 @@ function Login() {
                   <span className="text-2xl font-bold">S</span>
                 </div>
               </div>
-              <h1 className="text-2xl font-bold text-white mb-2">SECOVI</h1>
+              <h1 className="text-2xl font-bold text-white mb-2">Examen 2 FundaWeb</h1>
               <p className="text-white/80 text-sm">{getGreetingMessage()}</p>
             </div>
 
@@ -215,7 +215,7 @@ function Login() {
             {/* Footer */}
             <div className="mt-6 text-center">
               <p className="text-white/60 text-xs">
-                © 2024 SECOVI. Todos los derechos reservados.
+                © 2024 EXAMEN 2 FUNDAWEB. Todos los derechos reservados.
               </p>
             </div>
           </div>
